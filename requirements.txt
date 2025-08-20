@@ -1,0 +1,6 @@
+streamlit
+yt-dlp
+whisper
+elevenlabs
+moviepy
+python-dotenv

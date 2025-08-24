@@ -23,12 +23,24 @@ def transcribe_and_translate(audio_path: str):
             response = openai.audio.translations.create(
                 model="whisper-1",
                 file=audio_file,
-                response_format="srt"  # Request subtitle format
+                response_format="verbose_json"
             )
         print(f"API response: {response}")
+
         srt_path = f"{os.path.splitext(audio_path)[0]}.srt"
+        segments = getattr(response, "segments", [])
         with open(srt_path, "w", encoding="utf-8") as f:
-            f.write(response)
+            for i, segment in enumerate(segments):
+                # Use attribute access for TranscriptionSegment, fallback to dict
+                start = getattr(segment, 'start', None) if hasattr(segment, 'start') else segment.get('start', 0)
+                end = getattr(segment, 'end', None) if hasattr(segment, 'end') else segment.get('end', 0)
+                text = getattr(segment, 'text', '') if hasattr(segment, 'text') else segment.get('text', '')
+                # Ensure start and end are floats and not None
+                start = float(start) if start is not None else 0.0
+                end = float(end) if end is not None else 0.0
+                f.write(f"{i+1}\n")
+                f.write(f"{format_timestamp(start)} --> {format_timestamp(end)}\n")
+                f.write(f"{text.strip()}\n\n")
 
         return srt_path
 
@@ -37,5 +49,5 @@ def transcribe_and_translate(audio_path: str):
         raise RuntimeError(f"Whisper API transcription failed: {e}")
 
 if __name__ == "__main__":
-    audio_path = "outputs/Canva ｜ Dil Se Design Tak ｜ Jaadu Dadu ｜ Tamil.wav"
+    audio_path = "outputs\\Live_Bank_\\Live_Bank_Nifty_Option_Trading_____Intra.wav"
     transcribe_and_translate(audio_path)

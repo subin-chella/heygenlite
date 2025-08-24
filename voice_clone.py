@@ -26,10 +26,6 @@ if not api_key:
 
 client = ElevenLabs(api_key=api_key)
 
-# Ensure output directory exists
-OUTPUT_DIR = "outputs"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 def parse_srt_blocks(srt_path: str):
     """
     Parse SRT into a list of subtitle blocks.
@@ -113,7 +109,6 @@ def create_voice_with_settings(voice_id: str, stability: float = 0.5, similarity
 
 def generate_tts_for_srt_with_tone_control(
     srt_path: str, 
-    output_path: str, 
     voice_id: str = "JBFqnCBsd6RMkjVDRZzb",
     model_id: str = "eleven_multilingual_v2",
     reference_audio_path: str = None,
@@ -249,8 +244,12 @@ def generate_tts_for_srt_with_tone_control(
         final_audio[start_sample:end_sample] = audio_data
 
     # Save the final combined audio
-    sf.write(output_path, final_audio, sample_rate, format='MP3')
-    print(f"Successfully generated combined audio file at: {output_path}")
+    output_dir = os.path.dirname(srt_path)
+    srt_filename = os.path.splitext(os.path.basename(srt_path))[0]
+    output_audio_path = os.path.join(output_dir, f"{srt_filename}_combined_audio.mp3")
+
+    sf.write(output_audio_path, final_audio, sample_rate, format='MP3')
+    print(f"Successfully generated combined audio file at: {output_audio_path}")
     print(f"Total duration: {len(final_audio) / sample_rate:.2f} seconds")
     
     # Clean up cloned voice if it was created
@@ -308,45 +307,27 @@ if __name__ == "__main__":
         # Uncomment to see available voices
         # list_available_voices()
         
-        # Create a dummy SRT file for demonstration
-        dummy_srt_content = """1
-00:00:01,000 --> 00:00:03,500
-Hello there! This is a test.
-
-2
-00:00:04,000 --> 00:00:06,800
-This is the second line of the subtitle.
-
-3
-00:00:07,500 --> 00:00:10,200
-And here is the final part.
-"""
-        with open("subtitle.srt", "w", encoding="utf-8") as f:
-            f.write(dummy_srt_content)
         
         # Get emotional presets
         presets = create_emotional_presets()
         
         # Example 1: Using reference audio for tone matching
-        # reference_audio = "path/to/your/reference_audio.mp3"  # Uncomment and set path
-        reference_audio = None  # Set to None if you don't have reference audio
-        
+        reference_audio = "outputs/8_Nov___Tr/8_Nov___Trade_Analysis_BankNifty_Option_.wav"  # Set to None if you don't have reference audio
+
         # Example 2: Choose an emotional preset
-        chosen_tone = "conversational"  # Options: neutral, excited, calm, dramatic, professional, conversational
-        
-        input_srt_path = "subtitle.srt"
-        output_audio_path = os.path.join(OUTPUT_DIR, f"combined_audio_{chosen_tone}.mp3")
+        chosen_tone = "professional"  # Options: neutral, excited, calm, dramatic, professional, conversational
+
+        input_srt_path = "outputs/8_Nov___Tr/8_Nov___Trade_Analysis_BankNifty_Option_.srt"
         
         print(f"Generating audio with {chosen_tone} tone...")
         
         generate_tts_for_srt_with_tone_control(
             srt_path=input_srt_path,
-            output_path=output_audio_path,
             voice_id="JBFqnCBsd6RMkjVDRZzb",  # George - British male
             model_id="eleven_multilingual_v2",
             reference_audio_path=reference_audio,  # Optional: path to reference audio
             voice_settings=presets[chosen_tone],   # Use emotional preset
-            target_language=None  # Optional: specify if different from input
+            # target_language=None  # Optional: specify if different from input
         )
 
     except FileNotFoundError:

@@ -4,3 +4,7 @@ git+https://github.com/openai/whisper.git
 elevenlabs
 moviepy
 python-dotenv
+openai
+pyaudioop
+soundfile
+numpy

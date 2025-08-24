@@ -36,10 +36,10 @@ if st.button("Process Video") and not st.session_state.processing:
             audio_path = extract_audio(video_path)
 
             update_status("Transcribing and translating...")
-            hindi_transcript, english_translation, srt_path = transcribe_and_translate(audio_path)
+            srt_path = transcribe_and_translate(audio_path)
 
             update_status("Generating audio...")
-            audio_path = generate_tts(english_translation)
+            audio_path = generate_tts(srt_path)
 
             update_status("Merging video and audio...")
             final_video_path = combine_video_and_audio(video_path, audio_path, srt_path)

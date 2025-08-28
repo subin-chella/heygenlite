@@ -60,3 +60,9 @@ if __name__ == "__main__":
     print(f"Video downloaded to: {video_path}")
     audio_path = extract_audio(video_path)
     print(f"Audio extracted to: {audio_path}")
+
+
+
+if __name__ == "__main__":
+    audio_path = extract_audio("outputs\\Live_Bank_\\Live_Bank_Nifty_Option_Trading_____Intra.mp4")
+    print(f"Audio extracted to: {audio_path}")

@@ -137,8 +137,8 @@ if __name__ == "__main__":
     # Example usage
     try:
         # Run the function with the dummy file
-        input_srt_path = "outputs\\8_Nov___Tr\\8_Nov___Trade_Analysis_BankNifty_Option_.srt"
-        
+        input_srt_path = "C:\\Users\\Administrator\\workspace\\heygenlite\\outputs\\Live_Bank_\\Live_Bank_Nifty_Option_Trading_____Intra.srt"
+
         # You can change the voice_id and model_id here
         # Popular voice IDs:
         # "JBFqnCBsd6RMkjVDRZzb" - George (British male)

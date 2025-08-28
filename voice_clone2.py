@@ -110,12 +110,13 @@ def create_voice_with_settings(voice_id: str, stability: float = 0.5, similarity
 
 def generate_tts_for_srt_with_tone_control(
     srt_path: str, 
-    voice_id: str = "JBFqnCBsd6RMkjVDRZzb",
+    # voice_id: str = "JBFqnCBsd6RMkjVDRZzb",
     # model_id: str = "eleven_multilingual_v2",
     model_id: str = "eleven_multilingual_v2",
     reference_audio_path: str = None,
     voice_settings: dict = None,
-    target_language: str = None
+    target_language: str = None,
+    max_total_duration_sec: float = None  # NEW: limit total duration processed
 ):
     """
     Generate TTS audio for SRT subtitle file with advanced tone control.
@@ -130,8 +131,7 @@ def generate_tts_for_srt_with_tone_control(
         target_language: Target language for output (if different from input)
     """
     
-    # If reference audio is provided, clone the voice first
-    cloned_voice_id = None
+    # Always use cloned voice if reference audio is provided
     if reference_audio_path and os.path.exists(reference_audio_path):
         voice_name = f"cloned_voice_{int(time.time())}"
         cloned_voice_id = clone_voice_from_reference(
@@ -139,9 +139,12 @@ def generate_tts_for_srt_with_tone_control(
             voice_name,
             f"Voice cloned for maintaining tone from {os.path.basename(reference_audio_path)}"
         )
-        if cloned_voice_id:
-            voice_id = cloned_voice_id
-            print(f"Using cloned voice: {voice_id}")
+        if not cloned_voice_id:
+            raise RuntimeError("Voice cloning failed. No failover allowed. Aborting.")
+        voice_id_local = cloned_voice_id
+        print(f"Using cloned voice: {voice_id_local}")
+    else:
+        raise RuntimeError("Reference audio required for cloning. No failover allowed.")
     
     # Set default voice settings if not provided
     if not voice_settings:
@@ -163,56 +166,45 @@ def generate_tts_for_srt_with_tone_control(
     audio_segments = []
     sample_rate = 44100
 
+
+    total_duration_sec = 0.0
     for idx, start, end, text in blocks:
         if not text.strip():
             continue
 
-        print(f"Processing block {idx}: {text[:50]}...")
-
         start_time_ms = srt_time_to_ms(start)
         end_time_ms = srt_time_to_ms(end)
+        seg_duration_sec = (end_time_ms - start_time_ms) / 1000.0
 
-        # Generate TTS for the block with voice settings
+        # Stop if we've reached the max duration
+        if max_total_duration_sec is not None and total_duration_sec + seg_duration_sec > max_total_duration_sec:
+            print(f"Reached max duration ({max_total_duration_sec}s). Stopping.")
+            break
+
+        print(f"Processing block {idx}: {text[:50]}... [{start} - {end}]")
+
         try:
-            # Prepare the API call parameters
             tts_params = {
                 "text": text,
-                "voice_id": voice_id,
+                "voice_id": voice_id_local,
                 "model_id": model_id,
                 "output_format": "mp3_44100_128",
                 "voice_settings": voice_settings
             }
-            
-            # If target language is specified and different, add language hint
-            if target_language:
-                # Note: ElevenLabs automatically detects language, but you can hint
-                # by including language-specific text formatting or phonetic guides
-                pass
-            
             audio_iterator = client.text_to_speech.convert(**tts_params)
-
-            # Collect all bytes from the iterator
             audio_bytes = b"".join(audio_iterator)
-
-            # Save to temporary file and read with soundfile
             with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
                 temp_file.write(audio_bytes)
                 temp_file_path = temp_file.name
-
-            # Read the audio data
             audio_data, sr = sf.read(temp_file_path)
-            
-            # Clean up temp file
             os.unlink(temp_file_path)
-
-            # Store segment info
             audio_segments.append({
                 'start_ms': start_time_ms,
                 'end_ms': end_time_ms,
                 'audio_data': audio_data,
                 'sample_rate': sr
             })
-
+            total_duration_sec += seg_duration_sec
         except Exception as e:
             print(f"Error generating audio for block {idx}: {e}")
             continue
@@ -291,7 +283,7 @@ def create_emotional_presets():
     return {
         "neutral": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": True},
         "excited": {"stability": 0.3, "similarity_boost": 0.8, "style": 0.7, "use_speaker_boost": True},
-        "calm": {"stability": 0.9, "similarity_boost": 0.75, "style": 0.1, "use_speaker_boost": True},
+        "calm": {"stability": 1.0, "similarity_boost": 1, "style": 1, "use_speaker_boost": True},
         "dramatic": {"stability": 0.2, "similarity_boost": 0.85, "style": 0.9, "use_speaker_boost": True},
         "professional": {"stability": 0.7, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": True},
         "conversational": {"stability": 0.4, "similarity_boost": 0.7, "style": 0.4, "use_speaker_boost": True}
@@ -326,11 +318,11 @@ if __name__ == "__main__":
         
         generate_tts_for_srt_with_tone_control(
             srt_path=input_srt_path,
-            voice_id="JBFqnCBsd6RMkjVDRZzb",  # George - British male
+            # voice_id="JBFqnCBsd6RMkjVDRZzb",  # George - British male
             model_id="eleven_multilingual_v2",
             reference_audio_path=reference_audio,  # Optional: path to reference audio
             voice_settings=presets[chosen_tone],   # Use emotional preset
-            # target_language=None  # Optional: specify if different from input
+            max_total_duration_sec=20.0  # Only process first 20 seconds
         )
 
     except FileNotFoundError:

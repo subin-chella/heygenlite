@@ -46,6 +46,13 @@ def download_video(url):
         raise RuntimeError(f"Failed to download video: {e}")
 
 def extract_audio(video_path):
+    """
+    Extracts audio from a video file using ffmpeg.
+    To increase audio quality:
+      - Use a higher sample rate (e.g., 44100 Hz)
+      - Use stereo channels (-ac 2)
+      - Use a lossless codec (e.g., pcm_s24le or flac)
+    """
     audio_path = f"{os.path.splitext(video_path)[0]}.wav"
     command = [
         "ffmpeg", "-y", "-i", video_path,

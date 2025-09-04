@@ -1,0 +1,13 @@
+TTS==0.22.0
+streamlit
+yt-dlp
+elevenlabs
+moviepy
+python-dotenv
+openai
+soundfile
+numpy
+whisperx
+spleeter
+pydub
+librosa

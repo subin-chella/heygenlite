@@ -307,10 +307,10 @@ if __name__ == "__main__":
         
         # Example 1: Using reference audio for tone matching
         # reference_audio = "outputs\\Live_Bank_\\Live_Bank_Nifty_Option_Trading_____Intra.wav"  # Set to None if you don't have reference audio
-        reference_audio = "C:\\Users\\Administrator\\workspace\\heygenlite\\outputs\\Live_Bank_\\chunks\\chunk_003.wav"  # Set to None if you don't have reference audio
+        reference_audio = "C:\\Users\\Administrator\\workspace\\heygenlite\\Live_Bank_Nifty_Option_Trading_____Intra_segments\\Live_Bank_Nifty_Option_Trading_____Intra_part2.wav"  # Set to None if you don't have reference audio
 
         # Example 2: Choose an emotional preset
-        chosen_tone = "calm"  # Options: neutral, excited, calm, dramatic, professional, conversational
+        chosen_tone = "neutral"  # Options: neutral, excited, calm, dramatic, professional, conversational
 
         input_srt_path = "C:\\Users\\Administrator\\workspace\\heygenlite\\outputs\\Live_Bank_\\Live_Bank_Nifty_Option_Trading_____Intra.srt"
 

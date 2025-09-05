@@ -1,11 +1,16 @@
-streamlit
-yt-dlp
-# git+https://github.com/openai/whisper.git
-elevenlabs
-moviepy
-python-dotenv
-openai
-# pyaudioop
-soundfile
-numpy
-whisperx
+# Core TTS and Audio Processing python version 3.10.12
+TTS==0.22.0
+torch>=1.13.0,<2.0.0
+torchaudio>=0.13.0,<2.0.0
+pysrt==1.1.2
+pydub==0.25.1
+
+# Audio format support
+librosa>=0.9.0
+soundfile>=0.12.1
+
+# System dependencies (if needed)
+ffmpeg-python==0.2.0
+
+# Optional: For better performance
+numba>=0.56.0

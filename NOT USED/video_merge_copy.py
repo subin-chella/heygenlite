@@ -276,9 +276,20 @@ if __name__ == "__main__":
 
     # SINGLE FILE MODE SETTINGS
     VIDEO_PATH = "/Users/subin/workspace/heygenlite/outputs/Live_Bank_/Live_Bank_Nifty_Option_Trading_____Intra.mp4"           # Path to your MP4 video file
-    AUDIO_PATH = "/Users/subin/workspace/heygenlite/outputs/Live_Bank_/Live_Bank_Nifty_Option_Trading_____Intra_voice.wav"       # Path to your WAV audio file
+    AUDIO_PATH = "/Users/subin/workspace/heygenlite/output_audio_enhanced.wav"       # Path to your WAV audio file
     SUBTITLE_PATH = "/Users/subin/workspace/heygenlite/outputs/Live_Bank_/Live_Bank_Nifty_Option_Trading_____Intra copy.srt"          # Path to your SRT file (set to None if no subtitles)
 
+    # PROCESSING OPTIONS
+    # options = {
+    #     'replace_audio': True,
+    #     'video_codec': 'copy',
+    #     'audio_codec': 'aac',
+    #     'audio_bitrate': '192k'
+    # }
+
+    # =================================================================
+    # EXECUTION - No need to modify below this line
+    # =================================================================
 
     print("=== Video + Audio + Subtitle Merger ===")
     try:
